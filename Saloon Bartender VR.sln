@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{CC915342-E4FA-34BE-7174-84A4F6DBFC8A}") = "Saloon Bartender VR", "Assembly-CSharp-firstpass.csproj", "{919056FD-25C7-655A-F1BB-8E2977D760FA}"
+EndProject
+Project("{CC915342-E4FA-34BE-7174-84A4F6DBFC8A}") = "Saloon Bartender VR", "Assembly-CSharp.csproj", "{1E935EE2-5F32-E4AA-F9AB-A061AF56F430}"
+EndProject
+Project("{CC915342-E4FA-34BE-7174-84A4F6DBFC8A}") = "Saloon Bartender VR", "Assembly-CSharp-Editor.csproj", "{5AED7316-0515-01E6-9DD7-AC37A471A923}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{919056FD-25C7-655A-F1BB-8E2977D760FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{919056FD-25C7-655A-F1BB-8E2977D760FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{919056FD-25C7-655A-F1BB-8E2977D760FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{919056FD-25C7-655A-F1BB-8E2977D760FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E935EE2-5F32-E4AA-F9AB-A061AF56F430}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E935EE2-5F32-E4AA-F9AB-A061AF56F430}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E935EE2-5F32-E4AA-F9AB-A061AF56F430}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E935EE2-5F32-E4AA-F9AB-A061AF56F430}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AED7316-0515-01E6-9DD7-AC37A471A923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AED7316-0515-01E6-9DD7-AC37A471A923}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AED7316-0515-01E6-9DD7-AC37A471A923}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AED7316-0515-01E6-9DD7-AC37A471A923}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
