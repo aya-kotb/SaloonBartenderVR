@@ -2,6 +2,8 @@
 using System.Collections;
 
 public class Selector : MonoBehaviour {
+// Allows this object to be hovered over with the targeting reticule, showing its name and/or highlighting it
+
 	private TextMesh nameTag;
 	private DialogueController dialogueController;
 
@@ -26,4 +28,5 @@ public class Selector : MonoBehaviour {
 		GetComponent<MeshRenderer> ().material.color = Color.white;
 		nameTag.text = "";
 	}
+
 }

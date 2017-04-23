@@ -1,38 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
-public class DialogueSegment {
-	public int segmentId;
-	public string segmentText;
-	public bool hasChoice;
-	public string nextSegment;
-	public string nextSegmentPositive;
-	public string nextSegmentNegative;
-	public string speaker;
-	
-	// Segment (regular)
-	public DialogueSegment (int segid, string segtext, string segnext, string speak) {
-		segmentId = segid;
-		segmentText = segtext;
-		hasChoice = false;
-		nextSegment = segnext;
-		speaker = speak;
-	}
-	
-	// Segment (choice)
-	public DialogueSegment (int segid, string segtext, string segnextpos, string segnextmin, string speak) {
-		segmentId = segid;
-		segmentText = segtext;
-		hasChoice = true;
-		nextSegmentPositive = segnextpos;
-		nextSegmentNegative = segnextmin;
-		speaker = speak;
-	}
-}
+using VRTK;
 
 public class DialogueController : MonoBehaviour {
-	
+
+	// !!! Currently storing everything in separate Dicts, will come up with a better plan
 	public Dictionary<string, DialogueSegment> playerDialogueTree = new Dictionary<string, DialogueSegment>();
 	public AudioClip[] playerAudioClips;
 	public Dictionary<string, DialogueSegment> objectDialogueTree = new Dictionary<string, DialogueSegment>();
@@ -41,7 +14,6 @@ public class DialogueController : MonoBehaviour {
 	public AudioClip[] paquitoAudioClips;
 	public Dictionary<string, DialogueSegment> abigailDialogueTree = new Dictionary<string, DialogueSegment>();
 	public AudioClip[] abigailAudioClips;
-
 	public Dictionary<string, DialogueSegment> desperadoDialogueTree = new Dictionary<string, DialogueSegment>();
 	public AudioClip[] desperadoAudioClips;
 	public Dictionary<string, DialogueSegment> lucyDialogueTree = new Dictionary<string, DialogueSegment>();
@@ -60,16 +32,14 @@ public class DialogueController : MonoBehaviour {
 	public AudioClip currentDialogue;
 	public DialogueSegment currentDialogueSegment;
 
-
+	private VRTK_ControllerEvents leftController;
+	private VRTK_ControllerEvents rightController;
 	
 	void Awake () {
+	// !!! Will be read from Excel in later version
 		paquitoDialogueTree.Add ("Paquito_0", new DialogueSegment (0, "A vaquero without equal, this dashing, young Mexican", "Paquito_1", "P"));
 		paquitoDialogueTree.Add ("Paquito_1", new DialogueSegment (1, "Que tal, amigo? Yo quiero una cerveza por favor. Una, eh, beer.", "Paquito_2", "O"));
 		paquitoDialogueTree.Add ("Paquito_2", new DialogueSegment (2, "He looked like he could use one, so I poured him a drink.", "", "P"));
-
-		//paquitoDialogueTree.Add ("Paquito_0", new DialogueSegment (0, "Do I pour Paquito a drink?", "Paquito_1","Paquito_2" , "P"));
-		//paquitoDialogueTree.Add ("Paquito_1", new DialogueSegment (1, "Yes, of course. He deserves that drink!", "", "P"));
-		//paquitoDialogueTree.Add ("Paquito_2", new DialogueSegment (2, "His job is a dangerous one: he needs a clear head.", "", "P"));
 
 		abigailDialogueTree.Add ("Abigail_0", new DialogueSegment (0, "While almost of marrying age and certainly a looker, none of the regular patrons would dare lay a finger on Abigail.", "Abigail_1", "O"));
 		abigailDialogueTree.Add ("Abigail_1", new DialogueSegment (1, "The many drifters who attempted such a feat were prone to lose that finger, on account of her being the Sheriff's daughter and all.", "", "P"));
@@ -90,7 +60,9 @@ public class DialogueController : MonoBehaviour {
 		desperadoDialogueTree.Add ("Desperado_b2", new DialogueSegment (7, "But, w-why are you always bein’ so nice? I-I can’t do this.. I just need ta eat..", "Desperado_a3" , "O"));
 		desperadoDialogueTree.Add ("Desperado_b3", new DialogueSegment (8, "The young desperado holsters his gun, a defeated look on his face. There ain’t no fire and brimstone behind those eyes. He removes the bandana and I recognize him: Sawyer, old marshall’s son. Why don’t you calm down and come inside for drink, Sawyer. It’s been a while.", "Desperado_a4" , "P"));
 		desperadoDialogueTree.Add ("Desperado_b4", new DialogueSegment (9, "I can’t just..*pause* I’m sorry. Thank you. Thank you so much..", "" , "O"));
+	// !!!
 	}
+
 	
 	void Start () {
 		dialoguePlaying = false;
@@ -99,25 +71,28 @@ public class DialogueController : MonoBehaviour {
 		subtitles = GameObject.Find("Subtitles").GetComponent<TextMesh> ();
 		subtitleLength = 50;
 
+		leftController = player.gameObject.transform.FindChild ("Controller (left)").GetComponent<VRTK_ControllerEvents> ();
+		rightController = player.gameObject.transform.FindChild ("Controller (right)").GetComponent<VRTK_ControllerEvents> ();
 	}
 	
 	void Update () {
 		if (choosing) {
-			if (Input.GetKeyDown(KeyCode.Z)) {
+			// Negative dialogue choice (NO)
+			if (Input.GetKeyDown(KeyCode.Z) || leftController.touchpadPressed) {
 				MakeChoice(currentDialogueSegment.nextSegmentNegative, -1);
 			}
-			
-			if (Input.GetKeyDown(KeyCode.X)) {
+			// Positive dialogue choice (YES)
+			if (Input.GetKeyDown(KeyCode.X) || rightController.touchpadPressed) {
 				MakeChoice(currentDialogueSegment.nextSegmentPositive, 1);
 			}
 		}
 	}
-	
+		
 	public void MakeChoice(string id, int choic) {
-		// make memory
+		// Store dialogue decision
 		conversationPartner.memories.Add(id);
 		
-		// next segment
+		// Next segment
 		if (choic < 0) {
 			conversationPartner.nextDialogue = currentDialogueSegment.nextSegmentNegative;
 		}
@@ -126,46 +101,14 @@ public class DialogueController : MonoBehaviour {
 		}
 		
 		choosing = false;
-		
-		
 	}
-	
-	public AudioClip[] returnAudioClips (string personName) {
-		switch (personName) {
-		case "Paquito":
-			return paquitoAudioClips;
-		case "Abigail":
-			return abigailAudioClips;
-		case "Desperado":
-			return desperadoAudioClips;
-		case "Lucy":
-			return lucyAudioClips;
-		default:
-			return paquitoAudioClips;
-		}
-	}
-	
-	public Dictionary<string, DialogueSegment> returnDialogueTree (string personName) {
-		switch (personName) {
-		case "Paquito":
-			return paquitoDialogueTree;
-		case "Abigail":
-			return abigailDialogueTree;
-		case "Desperado":
-			return desperadoDialogueTree;
-		case "Lucy":
-			return lucyDialogueTree;
-		default:
-			return objectDialogueTree;
-		}
-	}
-	
+
 	public IEnumerator Dialogue () {
 		dialoguePlaying = true;
 		while (dialoguePlaying == true) {
 			currentDialogueSegment = conversationPartner.dialogueTree[conversationPartner.nextDialogue];
 			
-			// determine Speaker
+			// Determine Speaker
 			if (currentDialogueSegment.speaker == "P") {
 				speaker = player.gameObject.GetComponent<AudioSource>();
 			} 
@@ -178,14 +121,12 @@ public class DialogueController : MonoBehaviour {
 				StopCoroutine("Dialogue");
 			}
 			
-			// if it is a choice:
+			// Segment has a choice
 			if (conversationPartner.dialogueTree[conversationPartner.nextDialogue].hasChoice) {
-				// what must play
+				// Play and load audioclip
 				currentDialogue = conversationPartner.audioClips[currentDialogueSegment.segmentId];
-				// load audioclip
 				speaker.clip = currentDialogue;
 				print (currentDialogue.name);
-				// play audioclip
 				speaker.Play ();
 
 				if (currentDialogueSegment.speaker == "O") {
@@ -200,8 +141,7 @@ public class DialogueController : MonoBehaviour {
 
 				conversationPartner.gameObject.transform.Find ("Head/Mouth").GetComponent<Animator>().SetBool("Talking", false);
 
-				
-				// give choice, enter choosing state
+				// Enter choosing state
 				choosing = true;
 				InitiateChoosingState ();
 				while (choosing) {
@@ -209,17 +149,16 @@ public class DialogueController : MonoBehaviour {
 				}
 				subtitles.text = "";
 			}
-			// if it is not a Choice:
+			// Segment does not have a choice
 			else {
-				// what must play
+				// Play and load audioclip
 				currentDialogue = conversationPartner.audioClips[currentDialogueSegment.segmentId];
-				// load audioclip
 				speaker.clip = currentDialogue;
 				print (currentDialogue.name);
-				// play audioclip
 				speaker.Play ();
 				subtitles.text = formatDialogueText(currentDialogueSegment.segmentText, subtitleLength);
-				
+
+				// Set talking animation
 				if (currentDialogueSegment.speaker == "O") {
 					conversationPartner.gameObject.transform.Find ("Head/Mouth").GetComponent<Animator>().SetBool("Talking", true);
 				}
@@ -230,14 +169,13 @@ public class DialogueController : MonoBehaviour {
 				subtitles.text = "";
 				conversationPartner.nextDialogue = currentDialogueSegment.nextSegment;
 			}
-			
+
+			// End conversation if there is no following segment
 			if (conversationPartner.nextDialogue == "") {
 				dialoguePlaying = false;
 				conversationPartner.WishGranted();
 				conversationPartner.isActivated = false;
-
 			}
-			
 			yield return new WaitForSeconds (0.5f);
 		}
 	}
@@ -254,13 +192,43 @@ public class DialogueController : MonoBehaviour {
 		// hide GUI element
 	}
 
+	public AudioClip[] returnAudioClips (string personName) {
+		switch (personName) {
+		case "Paquito":
+			return paquitoAudioClips;
+		case "Abigail":
+			return abigailAudioClips;
+		case "Desperado":
+			return desperadoAudioClips;
+		case "Lucy":
+			return lucyAudioClips;
+		default:
+			return paquitoAudioClips;
+		}
+	}
+
+	public Dictionary<string, DialogueSegment> returnDialogueTree (string personName) {
+		switch (personName) {
+		case "Paquito":
+			return paquitoDialogueTree;
+		case "Abigail":
+			return abigailDialogueTree;
+		case "Desperado":
+			return desperadoDialogueTree;
+		case "Lucy":
+			return lucyDialogueTree;
+		default:
+			return objectDialogueTree;
+		}
+	}
+
 	public string formatDialogueText (string input, int sentenceLength) {
 		// Wrap text by line height
 		// Split string by char " "         
 		string[] words = input.Split (" " [0]);
 		string result = "";
 		string line = "";
-		// for each all words        
+		// Iterate through all words    
 		foreach (string s in words) {
 			// Append current word into line
 			string temp = line + " " + s;
@@ -275,17 +243,12 @@ public class DialogueController : MonoBehaviour {
 			else {
 				line = temp;
 			}
-
 		}
 		result += line;
 		return result.Substring (1, result.Length - 1);
 	}
 
-
-	
-	
-	
-}
+} // End
 
 
 

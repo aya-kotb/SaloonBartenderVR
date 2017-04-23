@@ -2,6 +2,8 @@
 using System.Collections;
 
 public class PersonHeadTurn : MonoBehaviour {
+// Allows NPC to creepily follow the player's movement with their heads
+
 	private Person person;
 
 	void Start () {
@@ -16,4 +18,5 @@ public class PersonHeadTurn : MonoBehaviour {
 			transform.LookAt (target);
 		}
 	}
+
 }

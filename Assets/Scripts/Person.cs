@@ -3,14 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Person : MonoBehaviour {
-
-	public Dictionary<string, DialogueSegment> dialogueTree = new Dictionary<string, DialogueSegment>();
+	
+	// References
 	private DialogueController dialogueController;
 	private GameController gameController;
 	private Player player;
-	public bool isActivated;
-	private Quaternion originalRot;
 
+	// Person attributes
 	public string personName;
 	public string nextDialogue;
 	public string memory;
@@ -18,34 +17,41 @@ public class Person : MonoBehaviour {
 	public AudioSource audio;
 	public AudioClip drinkingAudio;
 
+	public bool isActivated;
+	private Quaternion originalRot;
+
+	// Wishing
 	public GameObject wish;
 	public SpriteRenderer wishCurrentSprite;
 	public string wishCurrent;
 	public bool hasWish;
-
 	public GameObject currentDrink;
-	
-	public List<string> memories = new List<string>();
 
+	// Dialogue
+	public List<string> memories = new List<string>();
+	public Dictionary<string, DialogueSegment> dialogueTree = new Dictionary<string, DialogueSegment>();
 
 	void Start() {
-		wish = this.transform.FindChild ("Wish").gameObject;
-		wishCurrentSprite = wish.transform.FindChild("WishBubble").FindChild("WishCurrent").GetComponent<SpriteRenderer>();
-		wish.SetActive (false);
-		hasWish = false;
-
+		// Find references
 		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Player> ();
 		dialogueController = GameObject.FindGameObjectWithTag ("GameController").GetComponent<DialogueController> ();
 		gameController = GameObject.FindGameObjectWithTag ("GameController").GetComponent<GameController> ();
 		audio = this.GetComponent<AudioSource>();
 
+		// General Person setup
 		isActivated = false;
 		AssignDialogue ();
-		StartCoroutine ("Wishing");
+		StartCoroutine (Wishing(2.0f, 8.0f));
 	}
 
-	IEnumerator Wishing () {
-		// Give wish to talk
+	IEnumerator Wishing (float wishMin, float wishMax) {
+	// Find wishing-related objects
+		wish = this.transform.FindChild ("Wish").gameObject;
+		// ! Could be cleaner, find object directly
+		wishCurrentSprite = wish.transform.FindChild("WishBubble").FindChild("WishCurrent").GetComponent<SpriteRenderer>();
+		wish.SetActive (false);
+		hasWish = false;
+	
 		if (nextDialogue != "") {
 			wish.SetActive (true);
 			hasWish = true;
@@ -53,7 +59,8 @@ public class Person : MonoBehaviour {
 		}
 
 		while (true) {
-			yield return new WaitForSeconds (Random.Range (2.0f, 8.0f));
+			// Sets character's Wish after random interval between wishMin and wishMax
+			yield return new WaitForSeconds (Random.Range (wishMin, wishMax));
 			if (!hasWish) {
 				int rand = Random.Range (1, 10);
 				if (rand < 4) {
@@ -92,9 +99,9 @@ public class Person : MonoBehaviour {
 			WishGranted();
 		} else if (wishCurrent == "Drink" && player.isHoldingBooze) {
 			if (player.isHoldingBoozeLeft) {
-				player.handLeft.GiveDrink(this.gameObject);
+				player.handLeft.ServeDrink(this.gameObject);
 			} else {
-				player.handRight.GiveDrink(this.gameObject);
+				player.handRight.ServeDrink(this.gameObject);
 			}
 			HideWishing();
 			audio.clip = drinkingAudio;
@@ -118,6 +125,7 @@ public class Person : MonoBehaviour {
 	}
 
 	void OnCollisionEnter(Collision col) {
+	// Reactions to objects colliding with the Person change depending on Wishes
 		if (wishCurrent == "Beer") {
 			if (col.gameObject.name == "BeerBottleOpen") {
 				StartCoroutine(AcceptDrink (col.gameObject));
@@ -129,7 +137,6 @@ public class Person : MonoBehaviour {
 				StartCoroutine(AcceptDrink (col.gameObject));
 			}
 		}
-
 	}
 
 	public IEnumerator AcceptDrink(GameObject go) {
@@ -147,12 +154,15 @@ public class Person : MonoBehaviour {
 		Destroy (currentDrink);
 	}
 
-
 	public void AssignDialogue() {
 		personName = this.gameObject.name;
-		nextDialogue = personName + "_0";
-		dialogueTree = dialogueController.returnDialogueTree(personName);
-		audioClips = dialogueController.returnAudioClips(personName);
+		if (personName == "test") {
+			nextDialogue = "";
+		} else {
+			nextDialogue = personName + "_0";
+			dialogueTree = dialogueController.returnDialogueTree(personName);
+			audioClips = dialogueController.returnAudioClips(personName);
+		}
 	}
-	
-}
+
+} // End
