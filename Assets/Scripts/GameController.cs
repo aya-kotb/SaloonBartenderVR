@@ -33,7 +33,6 @@ public class GameController : MonoBehaviour {
 			Ray ray = Camera.main.ViewportPointToRay (new Vector3(0.5f, 0.5f, 0.0f)); 
 			RaycastHit hit;
 			if (Physics.Raycast(ray, out hit)) {
-				//print (hit.transform.name);
 				// Send Activation message
 				hit.collider.SendMessageUpwards("OnActivation");
 			}
@@ -46,32 +45,37 @@ public class GameController : MonoBehaviour {
 		Ray ray = Camera.main.ViewportPointToRay (new Vector3(0.5f, 0.5f, 0.0f)); 
 		RaycastHit hit;
 		if (Physics.Raycast(ray, out hit)) {
-			// Check if collider has the Selector component e.g. if it can be selected
-			if (hit.collider.gameObject.GetComponent<Selector>() != null) {
-				GameObject obj = hit.collider.gameObject;
-				Select (obj);
-				// Set new storedObject
-				if (storedObj == this.gameObject) {
-					storedObj = obj;
-				}
-				// Delect old object, select new object
-				if (obj != storedObj) {
-					Deselect (storedObj);
-					Select (obj);
-					storedObj = obj;
-				} else {
-					Select (obj);
-				}
+			HitSelection (hit);
+		}
+	}
+
+	// Select and Deselects the objects hit by the raycast
+	void HitSelection (RaycastHit hit) {
+		// Check if collider has the Selector component e.g. if it can be selected
+		if (hit.collider.gameObject.GetComponent<Selector>() != null) {
+			GameObject obj = hit.collider.gameObject;
+			Select (obj);
+			// Set new storedObject
+			if (storedObj == this.gameObject) {
+				storedObj = obj;
 			}
-			// Deselect the previously selected object, if possible
-			else {
-				if (storedObj != this.gameObject) {
-					try {
-						Deselect (storedObj);
-					}
-					catch (Exception e) {
-						print (e);
-					}
+			// Delect old object, select new object
+			if (obj != storedObj) {
+				Deselect (storedObj);
+				Select (obj);
+				storedObj = obj;
+			} else {
+				Select (obj);
+			}
+		}
+		// Deselect the previously selected object, if possible
+		else {
+			if (storedObj != this.gameObject) {
+				try {
+					Deselect (storedObj);
+				}
+				catch (Exception e) {
+					print (e);
 				}
 			}
 		}

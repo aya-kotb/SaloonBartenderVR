@@ -27,7 +27,7 @@ public class Hand : MonoBehaviour {
 		carryObject.GetComponent<Rigidbody>().useGravity = true;
 		carryObject = null;
 		isCarryingObject = false;
-		player.SetPlayerStatus(this);
+		player.DeterminePlayerStatus(this);
 	}
 
 	// Transfer 
@@ -39,7 +39,7 @@ public class Hand : MonoBehaviour {
 		person.GetComponent<Person>().currentDrink = carryObject;
 		carryObject = null;
 		isCarryingObject = false;
-		player.SetPlayerStatus(this);
+		player.DeterminePlayerStatus(this);
 	}
 
 	void OnCollisionStay(Collision col) {
@@ -55,7 +55,7 @@ public class Hand : MonoBehaviour {
 				ChangeHeldObjectRotation(col.gameObject);
 				carryObject = col.gameObject;
 				isCarryingObject = true;
-				player.SetPlayerStatus(this);
+				player.DeterminePlayerStatus(this);
 			}
 		}
 	}
